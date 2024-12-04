@@ -12,6 +12,14 @@ st.set_page_config(
     menu_items=None
 )
 
+# Initialize session state for login
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
+
+# Login function
+def check_login(username, password):
+    return username == "EMB" and password == "TRUE_EXpander"
+
 # Custom CSS for styling with professional green theme
 st.markdown("""
     <style>
@@ -26,6 +34,66 @@ st.markdown("""
         padding-top: 1rem !important;
         padding-bottom: 0rem !important;
         max-width: 100% !important;
+    }
+    
+    /* Login container styling */
+    .login-container {
+        max-width: 400px;
+        margin: 100px auto;
+        padding: 30px;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    
+    .login-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: #2a7144;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .login-error {
+        color: #ff4444;
+        margin-top: 20px;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #ffe6e6;
+        text-align: center;
+    }
+    
+    /* Style login button */
+    .stButton button {
+        background-color: #46bd72 !important;
+        color: white !important;
+        font-weight: 600 !important;
+        padding: 10px 25px !important;
+        border-radius: 5px !important;
+        border: none !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .stButton button:hover {
+        background-color: #2a7144 !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.15) !important;
+        transform: translateY(-1px) !important;
+    }
+
+    /* Style login inputs */
+    .stTextInput input {
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 5px !important;
+        padding: 10px 15px !important;
+        font-size: 16px !important;
+        margin-bottom: 15px !important;
+    }
+
+    .stTextInput input:focus {
+        border-color: #46bd72 !important;
+        box-shadow: 0 0 0 2px rgba(70, 189, 114, 0.2) !important;
     }
     
     /* Sidebar styling */
@@ -389,6 +457,28 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# Login page
+def show_login():
+    st.markdown("""
+        <div class="login-container">
+            <div class="login-title">EMB Capability Dashboard Login</div>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+    
+    if st.button("Login"):
+        if check_login(username, password):
+            st.session_state.logged_in = True
+            st.rerun()
+        else:
+            st.markdown("""
+                <div class="login-error">
+                    Invalid username or password. Please try again.
+                </div>
+            """, unsafe_allow_html=True)
+
 # Function to load data from Google Sheets
 @st.cache_data(ttl=3600)  # Cache data for 1 hour
 def load_data():
@@ -452,8 +542,8 @@ def get_filtered_options(df, industry_selection=None):
 def count_past_works(df):
     return df['Past Work'].notna().sum()
 
-# Main application
-def main():
+# Dashboard content
+def show_dashboard():
     st.markdown("""
         <div class="main-title">
             Capability Dashboard- EMB
@@ -664,6 +754,13 @@ def main():
             Failed to load data. Please check the Google Sheets URL and permissions.
             Make sure the sheet is accessible and properly formatted.
         """)
+
+# Main application
+def main():
+    if not st.session_state.logged_in:
+        show_login()
+    else:
+        show_dashboard()
 
 if __name__ == "__main__":
     main()
